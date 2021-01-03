@@ -1,0 +1,45 @@
+petId: $ref:Pet.id
+orderId: $ref:Order.id
+username: $ref:User.username
+status: $ref:Pet.status
+
+Category:
+  name: Test category
+  id:
+    generator: getOrderId
+
+Tag:
+  id: 22
+  name: test_tag
+
+Pet:
+  id:
+    generator: generatePetId
+  photoUrls: https://example.com
+  name: Test Pet Name
+  category:
+    id: $ref:Category.id
+    name: $ref:Category.name
+
+  tags: $ref:Tag
+  status: available
+
+Order:
+  petId: $ref:Pet.id
+  id:
+    generator: getOrderId
+  shipDate:
+    generator: getCurrentTime
+  complete: true
+  quantity: 42
+  status: approved
+
+User:
+  id: 9013685127327338000
+  firstName: user1
+  lastName: user1
+  password: password
+  userStatus: ACTIVE
+  phone: 111-111-222
+  email: test@rest.com
+  username: user1

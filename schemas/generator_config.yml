@@ -1,0 +1,9 @@
+request:
+  body:
+    empty: false
+    empty_json: false
+    invalid_json: false
+  schema:
+    invalid_value: false
+  path:
+    invalid_path_parameters: false
