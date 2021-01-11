@@ -1,22 +1,18 @@
 package bear.lab;
 
-import bear.lab.utils.ApiOperation;
-import bear.lab.utils.GeneratedTest;
-import bear.lab.generators.CoreTestGenerator;
-import bear.lab.utils.JsonSchemaManager;
-import bear.lab.utils.SwaggerReader;
-import bear.lab.utils.FeatureFileWriter;
-import bear.lab.utils.TestConfiguration;
+import bear.lab.krypton.generator.NewTestGenerator;
+import bear.lab.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Starter {
-    //b28e3cf6bbbfd868d532e8081cc998e0ec00f3dc
 
     static Logger logger = LoggerFactory.getLogger(Starter.class);
 
@@ -24,18 +20,30 @@ public class Starter {
 
         logger.info("Start processing");
 
-        SwaggerReader swaggerReader = new SwaggerReader(TestConfiguration.openApiJsonUrl);
+        String swaggerUrl = "";
+
+        SwaggerReader swaggerReader = new SwaggerReader(swaggerUrl);
 
         String version = swaggerReader.getVersion();
         JsonSchemaManager.setSchemas(swaggerReader.getSchemas());
         List<ApiOperation> operations = swaggerReader.getOperations();
 
-        CoreTestGenerator coreTestGenerator = new CoreTestGenerator();
-        List<GeneratedTest> tests = operations.stream().map(coreTestGenerator::generateAllTests).flatMap(List::stream).collect(Collectors.toList());
+        logger.info("Collect {} operations", operations.size());
 
-        logger.info("Generated {} tests", tests.size());
+        NewTestGenerator newTestGenerator = new NewTestGenerator();
 
-        FeatureFileWriter featureFileWriter = new FeatureFileWriter();
-        featureFileWriter.write(Paths.get(version + "_" + System.currentTimeMillis() + ".feature"), version, tests);
+        List<GeneratedCsvTest> collect = operations.stream().map(newTestGenerator::generate).flatMap(List::stream).collect(Collectors.toList());
+
+        logger.info("Generated {} tests", collect.size());
+
+        System.out.println("!");
+
+        FileWriter fileWriter = new FileWriter(new File("output.csv"));
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+
+        printWriter.println("operation, endpoint, method, isValid, test_type, test_data");
+        String tmp = "%s,%s,%s,%s,%s,%s";
+        collect.forEach(e -> printWriter.println(String.format(tmp, e.operation, e.endpoint, e.method, e.isValid, e.testType, e.testData)));
+        printWriter.close();
     }
 }

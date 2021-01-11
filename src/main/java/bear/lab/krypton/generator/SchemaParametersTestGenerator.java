@@ -1,4 +1,4 @@
-package bear.lab.generators;
+package bear.lab.krypton.generator;
 
 import bear.lab.utils.ApiOperation;
 import bear.lab.utils.GeneratedTest;

@@ -95,6 +95,10 @@ public class JsonSchemaManager {
 
         Map<String, Schema> properties = schemas.get(ref).getProperties();
 
+        if(properties == null) {
+            return result;
+        }
+
         for (Map.Entry<String, Schema> property : properties.entrySet()) {
 
             if (property.getValue().get$ref() != null) {

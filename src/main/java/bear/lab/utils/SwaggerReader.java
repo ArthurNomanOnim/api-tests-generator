@@ -1,12 +1,14 @@
 package bear.lab.utils;
 
-import bear.lab.utils.ApiOperation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -32,40 +34,43 @@ public class SwaggerReader {
 
     public List<ApiOperation> getOperations() {
         Set<Map.Entry<String, PathItem>> paths = openAPI.getPaths().entrySet();
-        return paths.stream().map(e -> getApiOperation(e.getValue(), e.getKey())).filter(Objects::nonNull).collect(Collectors.toList());
+        return paths.stream().map(e -> getApiOperation(e.getValue(), e.getKey())).flatMap(List::stream).collect(Collectors.toList());
     }
 
-    private static ApiOperation getApiOperation(PathItem pathItem, String pathKey) {
+    private static List<ApiOperation> getApiOperation(PathItem pathItem, String pathKey) {
+
+        List<ApiOperation> result = new ArrayList<>();
+
         if (pathItem.getGet() != null) {
-            if (pathItem.getGet().getDeprecated() == null) {
-                return new ApiOperation(pathItem.getGet(), pathKey, "GET");
+            if (pathItem.getGet().getDeprecated() == null || !pathItem.getGet().getDeprecated()) {
+                result.add(new ApiOperation(pathItem.getGet(), pathKey, "GET"));
             }
         }
 
         if (pathItem.getPost() != null) {
-            if (pathItem.getPost().getDeprecated() == null) {
-                return new ApiOperation(pathItem.getPost(), pathKey, "POST");
+            if (pathItem.getPost().getDeprecated() == null || !pathItem.getPost().getDeprecated()) {
+                result.add(new ApiOperation(pathItem.getPost(), pathKey, "POST"));
             }
         }
 
         if (pathItem.getPut() != null) {
-            if (pathItem.getPut().getDeprecated() == null) {
-                return new ApiOperation(pathItem.getPut(), pathKey, "PUT");
+            if (pathItem.getPut().getDeprecated() == null || !pathItem.getPut().getDeprecated()) {
+                result.add(new ApiOperation(pathItem.getPut(), pathKey, "PUT"));
             }
         }
 
         if (pathItem.getPatch() != null) {
-            if (pathItem.getPatch().getDeprecated() == null) {
-                return new ApiOperation(pathItem.getPatch(), pathKey, "PATCH");
+            if (pathItem.getPatch().getDeprecated() == null || !pathItem.getPatch().getDeprecated()) {
+                result.add(new ApiOperation(pathItem.getPatch(), pathKey, "PATCH"));
             }
         }
 
         if (pathItem.getDelete() != null) {
-            if (pathItem.getDelete().getDeprecated() != null) {
-                return new ApiOperation(pathItem.getDelete(), pathKey, "DELETE");
+            if (pathItem.getDelete().getDeprecated() != null || !pathItem.getDelete().getDeprecated()) {
+                result.add(new ApiOperation(pathItem.getDelete(), pathKey, "DELETE"));
             }
         }
 
-        return null;
+        return result;
     }
 }
